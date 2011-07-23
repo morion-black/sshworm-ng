@@ -1,0 +1,21 @@
+Global:
+    login: user
+    password: pass
+    jump_server: jump.example.org
+    ssh_port: 22
+    use_sudo: true
+    use_jump: true
+    use_threads: true
+    debug_level: error
+    tunnel_port: 6666
+    
+Servers:
+    solaris: 
+    freebsd:
+    linux: 
+        
+Groups:
+    fs:
+    web: 
+    db:
+    other:
