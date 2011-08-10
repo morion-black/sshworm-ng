@@ -6,7 +6,7 @@ require "classes/Commands"
 require "classes/Options"
 require "classes/Targets"
 
-WORM_VER = "0.2.1 Alpha"
+WORM_VER = "0.3.0 Alpha"
 WORM_AUTHORS = "vivus-ignis & InViZz"
 
 ################################################################################
