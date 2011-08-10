@@ -32,17 +32,25 @@ class SshSession
             if self.use_gw?
                 @threads << Thread.new {
                     self.via_gw do |jump_server|
-                        jump_server.ssh(hostname, @config['Global']['login'], @ssh_options) do |session|
-                            @commands_proc.call(session,hostname)
+                        begin
+                            jump_server.ssh(hostname, @config['Global']['login'], @ssh_options) do |session|
+                                @commands_proc.call(session,hostname)
+                            end
+                        rescue Net::SSH::Disconnect => errmsg
+                    		puts "#{hostname} : #{errmsg}"
+                    	rescue Net::SSH::AuthenticationFailed => errmsg
+                    		puts "#{hostname} : #{errmsg}"
+                    	rescue Errno::ETIMEDOUT => errmsg
+                    		puts "#{hostname} : #{errmsg}"
+                    	rescue Errno::ECONNREFUSED => errmsg
+                    		puts "#{hostname} : #{errmsg}"
                         end
                     end
                 }
             else
                 @threads << Thread.new {
                     Net::SSH.start(hostname,@config['Global']['login'], @ssh_options) do |session|
-                        @commands.each do |cmd|
-       				        self.exec(session,cmd)
-       			        end
+                        @commands_proc.call(session,hostname)
        		        end
        		    }
        	    end
@@ -54,11 +62,22 @@ class SshSession
     end
     
     def via_gw
-        jump_server = Net::SSH::Gateway.new(@config['Global']['jump_server'], @config['Global']['login'], @ssh_options)
+        begin
+            jump_server = Net::SSH::Gateway.new(@config['Global']['jump_server'], @config['Global']['login'], @ssh_options)
+               
+	        puts "DEBUG: port forwarding ok" if $DEBUG
 
-	    puts "DEBUG: port forwarding ok" if $DEBUG
-
-	    yield jump_server
+	        yield jump_server
+	    
+	    rescue Net::SSH::Disconnect => errmsg
+    		puts "Gateway : #{errmsg}"
+    	rescue Net::SSH::AuthenticationFailed => errmsg
+    		puts "Gateway : #{errmsg}"
+    	rescue Errno::ETIMEDOUT => errmsg
+    		puts "Gateway : #{errmsg}"
+    	rescue Errno::ECONNREFUSED => errmsg
+    		puts "Gateway : #{errmsg}"
+        end
     	    
     end
 
